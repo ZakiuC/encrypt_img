@@ -8,6 +8,15 @@ import os
 import sys
 
 
+def normalize_file_path(input_path):
+    # 去除输入字符串两端的引号
+    path = input_path.strip('"').strip("'")
+    # 替换不正确的路径分隔符
+    path = path.replace('\\', os.path.sep).replace('/', os.path.sep)
+    # 返回规范化的路径
+    return path
+
+
 def get_application_path():
     if getattr(sys, 'frozen', False):
         # 如果应用程序是“冻结”的，则使用这个路径
@@ -35,6 +44,9 @@ def save_encrypted_data_to_file(encrypted_data, file_name):
 
 def read_encrypted_data_from_file(file_path):
     """从文件读取加密数据"""
+    # 确保路径是有效的
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"The file {file_path} does not exist.")
     with open(file_path, 'rb') as file:
         return file.read()
     
@@ -80,7 +92,8 @@ def get_aes_key(password):
 def main():
     choice = input("Do you want to encrypt or decrypt an image? (e/d): ").strip().lower()
     if choice == 'e':
-        image_path = input("Enter the path of the image to encrypt: ")
+        image_path_input = input("Enter the path of the image to encrypt: ")
+        image_path = normalize_file_path(image_path_input)
         password = input("Enter your encryption password: ")
         key = get_aes_key(password)
         encrypted_data = encrypt_image(image_path, key)
@@ -90,7 +103,8 @@ def main():
         print(f"Encrypted data saved to {encrypted_file_path}")
     elif choice == 'd':
         # 在main函数中更新解密部分
-        encrypted_file_path = input("Enter the path of the encrypted data file: ")
+        encrypted_file_path_input = input("Enter the path of the encrypted data file: ")
+        encrypted_file_path = normalize_file_path(encrypted_file_path_input)
         password = input("Enter your decryption password: ")
         key = get_aes_key(password)
         decrypted_file_name = input("Enter the file name for the decrypted image: ")
