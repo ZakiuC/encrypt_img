@@ -2,4 +2,4 @@ build/
 dist/
 out/
 encrypt/
-.spec
+*.spec
